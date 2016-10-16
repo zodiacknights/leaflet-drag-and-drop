@@ -12,11 +12,11 @@ const addUglify = bundler => (
     .transform('uglifyify', { global: true })
 );
 
-const createBundle = (bundler) => {
+const createBundle = bundler => (
   bundler.bundle() // Create new bundle that uses the cache for high performance
     .pipe(source('bundle.js'))
-    .pipe(gulp.dest('public/dist/'));
-};
+    .pipe(gulp.dest('./public'))
+);
 
 gulp.task('browserify', () => {
   let bundler = browserify({
@@ -40,11 +40,11 @@ gulp.task('browserify', () => {
     });
   }
 
-  createBundle(bundler);
+  return createBundle(bundler);
 });
 
-gulp.task('gh-pages', () => (
-  gulp.src(['./public/index.html', './public/dist/bundle.js'])
+gulp.task('gh-pages', ['browserify'], () => (
+  gulp.src(['./public/index.html', './public/**/bundle.js'])
     .pipe(ghPages())
 ));
 
