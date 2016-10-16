@@ -5,16 +5,17 @@ import source from 'vinyl-source-stream'; // Used to stream bundle for further h
 import browserify from 'browserify';
 import watchify from 'watchify';
 import envify from 'envify/custom';
+import ghPages from 'gulp-gh-pages';
 
 const addUglify = bundler => (
   bundler.transform(envify({ NODE_ENV: 'production' }), { global: true })
-  .transform('uglifyify', { global: true })
+    .transform('uglifyify', { global: true })
 );
 
 const createBundle = (bundler) => {
   bundler.bundle() // Create new bundle that uses the cache for high performance
-  .pipe(source('bundle.js'))
-  .pipe(gulp.dest('public/dist/'));
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest('public/dist/'));
 };
 
 gulp.task('browserify', () => {
@@ -26,8 +27,8 @@ gulp.task('browserify', () => {
     fullPaths: false, // Requirement of watchify
     extensions: ['.js', '.jsx'],
   })
-  .transform('browserify-css', { autoInject: true })
-  .transform('babelify', { presets: ['es2015', 'react'] });
+    .transform('browserify-css', { autoInject: true })
+    .transform('babelify', { presets: ['es2015', 'react'] });
 
   if (util.env.production) {
     addUglify(bundler);
@@ -42,5 +43,11 @@ gulp.task('browserify', () => {
   createBundle(bundler);
 });
 
-// Just running the two tasks
+gulp.task('gh-pages', () => (
+  gulp.src(['./public/index.html', './public/dist/bundle.js'])
+    .pipe(ghPages())
+));
+
 gulp.task('default', ['browserify']);
+
+gulp.task('deploy', ['browserify', 'gh-pages']);
